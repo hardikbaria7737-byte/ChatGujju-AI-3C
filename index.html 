@@ -1,0 +1,152 @@
+
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChatGujju AI 3C</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#101522;color:#fff}
+header{padding:18px;background:#19243a;text-align:center;border-bottom:1px solid #34425c}
+header h2{margin:0;color:#65e4cf}
+header p{margin:6px 0 0;color:#bdc8d9;font-size:13px}
+.app{max-width:750px;margin:auto;height:calc(100dvh - 83px);display:flex;flex-direction:column;padding:12px}
+.toolbar{display:flex;gap:8px;margin-bottom:10px}
+button{border:0;border-radius:10px;padding:11px;background:#293750;color:white;cursor:pointer}
+button:active{opacity:.7}
+#chat{flex:1;overflow-y:auto;padding:5px}
+.msg{padding:12px 14px;margin:10px 0;border-radius:14px;max-width:90%;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5}
+.user{margin-left:auto;background:#176e67}
+.bot{margin-right:auto;background:#202c42}
+.welcome{text-align:center;color:#b8c5d9;margin:35px 5px}
+form{display:flex;gap:7px;padding-top:10px}
+input{min-width:0;flex:1;background:#202c42;color:white;border:1px solid #3b4b66;border-radius:12px;padding:14px;font-size:16px}
+.send{background:#08a88e;font-weight:bold}
+.note{font-size:11px;color:#9eacc1;text-align:center;padding:9px}
+</style>
+</head>
+<body>
+<header>
+<h2>💚 ChatGujju AI 3C</h2>
+<p>તમારો ગુજરાતી AI મિત્ર • Your Gujarati AI Friend</p>
+</header>
+
+<main class="app">
+<div class="toolbar">
+<button type="button" onclick="newChat()">➕ New Chat</button>
+<button type="button" onclick="showHistory()">🕘 History</button>
+<button type="button" onclick="startVoice()">🎤 બોલો</button>
+</div>
+
+<div id="chat" aria-live="polite">
+<div class="welcome">
+<h3>જય શ્રી કૃષ્ણ 🙏</h3>
+તમારું ChatGujju AI માં સ્વાગત છે!<br>
+ગુજરાતીમાં વાત શરૂ કરો.
+</div>
+</div>
+
+<form id="form">
+<input id="message" placeholder="ગુજરાતીમાં લખો..." autocomplete="off" required>
+<button class="send" type="submit">➤ મોકલો</button>
+</form>
+<div class="note" id="status">ChatGujju AI 3C • Prototype</div>
+</main>
+
+<script>
+const chat=document.getElementById('chat');
+const input=document.getElementById('message');
+const statusBox=document.getElementById('status');
+let messages=[];
+let history=readHistory();
+
+function readHistory(){
+ try{return JSON.parse(localStorage.getItem('cg3c_history')||'[]')}
+ catch(e){return []}
+}
+function saveHistory(){
+ try{
+ localStorage.setItem('cg3c_history',JSON.stringify(history.slice(-30)));
+ }catch(e){}
+}
+function addMessage(text,who){
+ const empty=chat.querySelector('.welcome');
+ if(empty)empty.remove();
+ const el=document.createElement('div');
+ el.className='msg '+who;
+ el.textContent=text;
+ chat.appendChild(el);
+ chat.scrollTop=chat.scrollHeight;
+}
+function newChat(){
+ if(messages.length){
+ history.push({date:new Date().toLocaleString(),messages:messages});
+ saveHistory();
+ }
+ messages=[];
+ chat.innerHTML='<div class="welcome"><h3>જય શ્રી કૃષ્ણ 🙏</h3>નવી વાતચીત શરૂ કરો!</div>';
+ statusBox.textContent='નવી વાતચીત';
+}
+function showHistory(){
+ if(!history.length){
+ alert('હજી કોઈ જૂની વાતચીત સેવ નથી.');
+ return;
+ }
+ const choice=prompt('જૂની વાતચીત પસંદ કરો. નંબર લખો:\n'+
+ history.map((h,i)=>(i+1)+'. '+h.date).join('\n'));
+ const i=Number(choice)-1;
+ if(!Number.isInteger(i)||i<0||i>=history.length)return;
+ messages=history[i].messages.slice();
+ chat.innerHTML='';
+ messages.forEach(m=>addMessage(m.text,m.who));
+ statusBox.textContent='જૂની વાતચીત';
+}
+function reply(text){
+ const t=text.toLowerCase();
+ if(/^(hi|hello|hey|નમસ્તે|કેમ છો)/i.test(t))
+ return 'નમસ્તે ભાઈ! 😊 હું ChatGujju AI છું. તમે કેમ છો?';
+ if(t.includes('કેમ છો')||t.includes('majama'))
+ return 'હું મજામાં છું ભાઈ! 😄 તમે કેમ છો?';
+ if(t.includes('તમારું નામ')||t.includes('તારું નામ'))
+ return 'મારું નામ ChatGujju AI 3C છે! 💚';
+ if(t.includes('સમય')||t.includes('time'))
+ return 'હાલનો સમય: '+new Date().toLocaleTimeString('gu-IN');
+ if(t.includes('તારીખ')||t.includes('date'))
+ return 'આજની તારીખ: '+new Date().toLocaleDateString('gu-IN');
+ if(t.includes('આભાર')||t.includes('thank'))
+ return 'તમારું સ્વાગત છે ભાઈ! ❤️';
+ if(t.includes('મજાક')||t.includes('joke'))
+ return 'શિક્ષક: હોમવર્ક કેમ નથી કર્યું? વિદ્યાર્થી: સર, Wi-Fi નહોતું એટલે Google ન ચાલ્યું! 😂';
+ return 'ભાઈ, તમારો સંદેશ મળ્યો: "'+text+'"\n\nહું અત્યારે પ્રોટોટાઇપ મોડમાં છું. સાચા AI જેવા જવાબો માટે સુરક્ષિત AI સર્વર જોડવો પડશે.';
+}
+document.getElementById('form').addEventListener('submit',function(e){
+ e.preventDefault();
+ const text=input.value.trim();
+ if(!text)return;
+ input.value='';
+ messages.push({text:text,who:'user'});
+ addMessage(text,'user');
+ const answer=reply(text);
+ messages.push({text:answer,who:'bot'});
+ addMessage(answer,'bot');
+ statusBox.textContent='Prototype mode';
+});
+function startVoice(){
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR){
+ alert('Voice input માટે Chrome browser માં અજમાવો.');
+ return;
+ }
+ const recognition=new SR();
+ recognition.lang='gu-IN';
+ recognition.onresult=e=>{
+ input.value=e.results[0][0].transcript;
+ input.focus();
+ };
+ recognition.onerror=()=>statusBox.textContent='માઇક ઉપલબ્ધ નથી';
+ recognition.start();
+}
+</script>
+</body>
+</html>
